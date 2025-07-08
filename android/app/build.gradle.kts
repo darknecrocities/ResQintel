@@ -8,7 +8,7 @@ plugins {
 android {
     namespace = "com.example.resqintel"
     compileSdk = flutter.compileSdkVersion
-    ndkVersion = flutter.ndkVersion
+    ndkVersion = "27.0.12077973" // ← required version
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
