@@ -73,7 +73,6 @@ Current solutions tend to be reactive rather than proactive. ResQintel aims to b
 | Layer             | Tools/Technologies                                  |
 |------------------|------------------------------------------------------|
 | Mobile Frontend  | Flutter                                              |
-| Web Frontend     | React.js                                             |
 | Backend          | Firebase, YOLOv11, TensorFlow                        |
 | Database         | Firebase Firestore, Google Cloud Platform            |
 | APIs / Libraries | Google Maps API, Text Recognition API, Image Classifier, Gemma, Gemini |
