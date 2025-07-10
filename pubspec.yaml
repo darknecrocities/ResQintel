@@ -1,4 +1,4 @@
-name: resqintel
+name: ResQintel
 description: "A new Flutter project."
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
@@ -30,7 +30,13 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  intl: ^0.18.1
+  firebase_core: ^3.15.1
+  cloud_firestore: ^5.0.0
+  shared_preferences: ^2.2.2
+  firebase_auth: ^5.6.2
+  intl: ^0.20.2
+  graphview: ^1.0.0
+
 
 
   # The following adds the Cupertino Icons font to your application.
@@ -39,15 +45,18 @@ dependencies:
   intl_phone_number_input: ^0.7.4
 
 dev_dependencies:
+  flutter_native_splash: ^2.3.2
   flutter_test:
     sdk: flutter
+
+  flutter_launcher_icons: ^0.14.4
 
   # The "flutter_lints" package below contains a set of recommended lints to
   # encourage good coding practices. The lint set provided by the package is
   # activated in the `analysis_options.yaml` file located at the root of your
   # package. See that file for information about deactivating specific lint
   # rules and activating additional ones.
-  flutter_lints: ^5.0.0
+  flutter_lints: ^6.0.0
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
@@ -63,7 +72,19 @@ flutter:
     - Assets/bg.png
     - Assets/bgcolor.png
     - Assets/logo.png
+    - icon.png
 
+flutter_launcher_icons:
+  android: true
+  ios: true
+  image_path: "icon.png"
+
+flutter_native_splash:
+  color: "#ffffff" # Background color
+  image: icon.png # Your splash image path
+  android: true
+  ios: true
+  web: false
   # To add assets to your application, add an assets section, like this:
   # assets:
   #   - images/a_dot_burr.jpeg
@@ -90,6 +111,6 @@ flutter:
   #       - asset: fonts/TrajanPro.ttf
   #       - asset: fonts/TrajanPro_Bold.ttf
   #         weight: 700
-  #
+
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/to/font-from-package

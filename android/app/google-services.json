@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "36995347433",
+    "project_id": "resqintel",
+    "storage_bucket": "resqintel.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:36995347433:android:2788dcd22211a6a4c9d178",
+        "android_client_info": {
+          "package_name": "com.example.resqintel"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAMxOV16D3I8WFe10CouMhw2k3gwViAQ7E"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
