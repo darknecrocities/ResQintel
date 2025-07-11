@@ -1,7 +1,12 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'map.dart';  // <-- Import your full MapPage and SearchPage here
+
+import 'learn.dart';
+import 'map.dart';
+import 'privacy.dart';
+import 'settings.dart';
+import 't&c.dart';
 
 class Homepage extends StatefulWidget {
   const Homepage({super.key});
@@ -10,14 +15,26 @@ class Homepage extends StatefulWidget {
   State<Homepage> createState() => _HomepageState();
 }
 
-class _HomepageState extends State<Homepage> {
-  String firstName = "";
+class _HomepageState extends State<Homepage> with TickerProviderStateMixin {
+  String firstName = "User";
   int _selectedIndex = 0;
+  late AnimationController _fadeController;
+  late Animation<double> _fadeAnimation;
 
   @override
   void initState() {
     super.initState();
     fetchUserData();
+
+    _fadeController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 800),
+    );
+    _fadeAnimation = CurvedAnimation(
+      parent: _fadeController,
+      curve: Curves.easeIn,
+    );
+    _fadeController.forward();
   }
 
   Future<void> fetchUserData() async {
@@ -28,7 +45,7 @@ class _HomepageState extends State<Homepage> {
           .doc(user.uid)
           .get();
       setState(() {
-        firstName = doc.data()?['firstname'] ?? "";
+        firstName = doc.data()?['firstname'] ?? "User";
       });
     }
   }
@@ -36,33 +53,30 @@ class _HomepageState extends State<Homepage> {
   void _onItemTapped(int index) {
     switch (index) {
       case 0:
-      // Stay on Home
-        setState(() {
-          _selectedIndex = 0;
-        });
+        setState(() => _selectedIndex = 0);
         break;
       case 1:
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => const SearchPage()),  // from map.dart
+          MaterialPageRoute(builder: (_) => const SearchPage()),
         );
         break;
       case 2:
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => const LearnPage()),
+          MaterialPageRoute(builder: (_) => const LearnPage()),
         );
         break;
       case 3:
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => const MapPage()),  // from map.dart
+          MaterialPageRoute(builder: (_) => const MapPage()),
         );
         break;
       case 4:
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => const ProfilePage()),
+          MaterialPageRoute(builder: (_) => const ProfilePage()),
         );
         break;
     }
@@ -73,36 +87,42 @@ class _HomepageState extends State<Homepage> {
     return Scaffold(
       backgroundColor: Colors.white,
       drawer: Drawer(
-        child: ListView(
-          padding: EdgeInsets.zero,
-          children: [
-            const DrawerHeader(
-              decoration: BoxDecoration(color: Colors.red),
-              child: Text(
-                "Menu",
-                style: TextStyle(color: Colors.white, fontSize: 24),
+        child: Container(
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              colors: [Colors.red, Colors.redAccent],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+          ),
+          child: ListView(
+            padding: EdgeInsets.zero,
+            children: [
+              const DrawerHeader(
+                child: Center(
+                  child: Text(
+                    "ResQintel Menu",
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
               ),
-            ),
-            ListTile(
-              leading: const Icon(Icons.settings),
-              title: const Text("Settings"),
-              onTap: () {
-                Navigator.pop(context); // close drawer
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => const SettingsPage()),
-                );
-              },
-            ),
-            const ListTile(
-              leading: Icon(Icons.article),
-              title: Text("Terms & Conditions"),
-            ),
-            const ListTile(
-              leading: Icon(Icons.privacy_tip),
-              title: Text("Privacy Policy"),
-            ),
-          ],
+              _drawerItem(Icons.settings, "Settings", const SettingsPage()),
+              _drawerItem(
+                Icons.article,
+                "Terms & Conditions",
+                const TermsPage(),
+              ),
+              _drawerItem(
+                Icons.privacy_tip,
+                "Privacy Policy",
+                const PrivacyPolicyPage(),
+              ),
+            ],
+          ),
         ),
       ),
       appBar: AppBar(
@@ -110,18 +130,21 @@ class _HomepageState extends State<Homepage> {
         elevation: 0,
         leading: Builder(
           builder: (context) => IconButton(
-            icon: const Icon(Icons.menu, color: Colors.black),
+            icon: const Icon(Icons.menu, color: Colors.red),
             onPressed: () => Scaffold.of(context).openDrawer(),
           ),
         ),
       ),
-      body: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 10),
-        child: _selectedIndex == 0 ? _buildHomeContent() : Container(),
+      body: FadeTransition(
+        opacity: _fadeAnimation,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 10),
+          child: _selectedIndex == 0 ? _buildHomeContent() : Container(),
+        ),
       ),
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _selectedIndex,
-        selectedItemColor: Colors.blue,
+        selectedItemColor: Colors.red,
         unselectedItemColor: Colors.grey,
         showSelectedLabels: false,
         showUnselectedLabels: false,
@@ -137,11 +160,24 @@ class _HomepageState extends State<Homepage> {
     );
   }
 
+  Widget _drawerItem(IconData icon, String title, Widget page) {
+    return ListTile(
+      leading: Icon(icon, color: Colors.white),
+      title: Text(
+        title,
+        style: const TextStyle(color: Colors.white, fontSize: 16),
+      ),
+      onTap: () {
+        Navigator.pop(context);
+        Navigator.push(context, MaterialPageRoute(builder: (_) => page));
+      },
+    );
+  }
+
   Widget _buildHomeContent() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Top Left Welcome Box
         Container(
           padding: const EdgeInsets.all(20),
           width: double.infinity,
@@ -152,57 +188,56 @@ class _HomepageState extends State<Homepage> {
               end: Alignment.bottomRight,
             ),
             borderRadius: BorderRadius.circular(20),
+            boxShadow: const [
+              BoxShadow(
+                color: Colors.redAccent,
+                blurRadius: 8,
+                offset: Offset(0, 4),
+              ),
+            ],
           ),
-          child: Text(
-            "Welcome Back, $firstName!",
-            style: const TextStyle(
-              fontSize: 22,
-              fontWeight: FontWeight.bold,
-              color: Colors.white,
-            ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                "ResQintel App",
+                style: TextStyle(
+                  fontSize: 24,
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                  letterSpacing: 1.2,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                "Welcome back, $firstName 👋",
+                style: const TextStyle(fontSize: 18, color: Colors.white),
+              ),
+              const SizedBox(height: 6),
+              const Text(
+                "Rescue Powered Emergency App",
+                style: TextStyle(
+                  color: Colors.white70,
+                  fontStyle: FontStyle.italic,
+                ),
+              ),
+            ],
           ),
         ),
         const SizedBox(height: 30),
-
-        // Center Placeholder Box
-        Container(
-          height: 150,
-          width: double.infinity,
-          decoration: BoxDecoration(
-            color: Colors.grey[300],
-            borderRadius: BorderRadius.circular(20),
-          ),
-          child: const Center(
-            child: Text(
-              "Center Placeholder Box",
-              style: TextStyle(fontSize: 16),
-            ),
-          ),
-        ),
+        _featureCard(Icons.warning, "Center Alert Area", Colors.amber),
         const SizedBox(height: 20),
-
-        // Two Smaller Placeholder Boxes
         Row(
           children: [
             Expanded(
-              child: Container(
-                height: 100,
-                decoration: BoxDecoration(
-                  color: Colors.grey[300],
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: const Center(child: Text("Box 1")),
-              ),
+              child: _featureCard(Icons.shield, "Safety Box", Colors.green),
             ),
             const SizedBox(width: 20),
             Expanded(
-              child: Container(
-                height: 100,
-                decoration: BoxDecoration(
-                  color: Colors.grey[300],
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: const Center(child: Text("Box 2")),
+              child: _featureCard(
+                Icons.support_agent,
+                "Assistance",
+                Colors.blue,
               ),
             ),
           ],
@@ -210,21 +245,40 @@ class _HomepageState extends State<Homepage> {
       ],
     );
   }
-}
 
-// Placeholder pages (only for pages not implemented yet)
-
-class LearnPage extends StatelessWidget {
-  const LearnPage({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('Learn')),
-      body: const Center(child: Text('This is the Learn Page')),
+  Widget _featureCard(IconData icon, String label, Color color) {
+    return Container(
+      height: 120,
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: color.withOpacity(0.3),
+            blurRadius: 10,
+            offset: const Offset(0, 5),
+          ),
+        ],
+        border: Border.all(color: color.withOpacity(0.6), width: 1),
+      ),
+      child: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(icon, color: color, size: 36),
+            const SizedBox(height: 10),
+            Text(
+              label,
+              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
+
+// Placeholder Pages
 
 class SearchPage extends StatelessWidget {
   const SearchPage({super.key});
@@ -232,8 +286,8 @@ class SearchPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Learn')),
-      body: const Center(child: Text('This is the Learn Page')),
+      appBar: AppBar(title: const Text('Search')),
+      body: const Center(child: Text('This is the Search Page')),
     );
   }
 }
@@ -246,18 +300,6 @@ class ProfilePage extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(title: const Text('Profile')),
       body: const Center(child: Text('This is the Profile Page')),
-    );
-  }
-}
-
-class SettingsPage extends StatelessWidget {
-  const SettingsPage({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('Settings')),
-      body: const Center(child: Text('This is the Settings Page')),
     );
   }
 }

@@ -1,0 +1,72 @@
+[
+  {
+    "icon": "cloud",
+    "title": "Typhoon",
+    "description": "A typhoon is a mature tropical cyclone that develops in the Northwest Pacific Ocean. It can bring violent winds, heavy rain, and flooding.",
+    "preparation": "- Prepare an emergency kit\n- Charge phones & power banks\n- Reinforce windows and roofs\n- Stay updated via radio/TV",
+    "during": "- Stay indoors & away from windows\n- Don’t cross flooded roads\n- Turn off gas and electricity if needed\n- Wait for official all-clear signal"
+  },
+  {
+    "icon": "public",
+    "title": "Earthquake",
+    "description": "An earthquake is the shaking of the surface of the Earth caused by a sudden slip on a fault. It can cause destruction and aftershocks.",
+    "preparation": "- Secure heavy items on walls\n- Know safe spots at home\n- Practice duck, cover & hold\n- Prepare emergency contact list",
+    "during": "- Drop, cover, and hold\n- Stay away from windows & shelves\n- If outside, go to an open space\n- After shaking, evacuate if unsafe"
+  },
+  {
+    "icon": "local_fire_department",
+    "title": "Fire",
+    "description": "Fires can happen at home or in nature and spread quickly. Understanding prevention and safety steps can save lives.",
+    "preparation": "- Install smoke detectors\n- Have fire extinguishers ready\n- Plan an escape route\n- Keep flammable items safe",
+    "during": "- Evacuate immediately\n- Stay low to avoid smoke\n- Stop, drop & roll if clothing catches fire\n- Call emergency services"
+  },
+  {
+    "icon": "terrain",
+    "title": "Volcanic Eruption",
+    "description": "Volcanic eruptions eject lava, ash, and gases, posing hazards to health and infrastructure.",
+    "preparation": "- Know evacuation zones\n- Prepare a go-bag\n- Keep goggles and masks ready\n- Monitor official updates",
+    "during": "- Stay indoors or evacuate\n- Use mask to prevent ash inhalation\n- Avoid rivers and low areas\n- Stay tuned to local authorities"
+  },
+  {
+    "icon": "water",
+    "title": "Flood",
+    "description": "Flooding occurs when water overflows onto land that is normally dry, caused by heavy rains, storms, or dam failure.",
+    "preparation": "- Elevate valuables\n- Know evacuation routes\n- Avoid building in floodplains\n- Prepare emergency kits",
+    "during": "- Move to higher ground\n- Avoid walking in floodwaters\n- Turn off utilities\n- Follow evacuation orders"
+  },
+  {
+    "icon": "landscape",
+    "title": "Landslide",
+    "description": "Landslides are rapid downward movements of rock, earth, or debris, often triggered by heavy rainfall.",
+    "preparation": "- Avoid building near slopes\n- Watch for cracks or leaning trees\n- Prepare escape plans\n- Install retaining structures if needed",
+    "during": "- Move away quickly from the path\n- Stay alert to sudden sounds\n- Don't return until declared safe\n- Call emergency services"
+  },
+  {
+    "icon": "waves",
+    "title": "Storm Surge",
+    "description": "Storm surges are abnormal rises in seawater level during a storm, caused by strong winds and low pressure.",
+    "preparation": "- Know surge-prone areas\n- Prepare evacuation plans\n- Stay informed of storm updates\n- Avoid coastal zones during storms",
+    "during": "- Evacuate early\n- Stay away from beaches\n- Don’t drive through flooded roads\n- Wait for official clearance"
+  },
+  {
+    "icon": "tsunami",
+    "title": "Tsunami",
+    "description": "A tsunami is a series of large sea waves caused by underwater earthquakes or eruptions, with devastating coastal impact.",
+    "preparation": "- Know warning signs (e.g. rapid water retreat)\n- Familiarize evacuation routes\n- Build emergency kits\n- Avoid coastal areas during quakes",
+    "during": "- Evacuate immediately to high ground\n- Do not return until authorities say it's safe\n- Stay away from rivers and streams\n- Help others if possible"
+  },
+  {
+    "icon": "science",
+    "title": "Oil Spill",
+    "description": "Oil spills can severely damage marine ecosystems, impacting both wildlife and coastal communities.",
+    "preparation": "- Support regulations for safer oil transport\n- Report spills early\n- Be informed about local risks",
+    "during": "- Avoid contaminated zones\n- Follow cleanup advisories\n- Report wildlife in distress\n- Stay updated via authorities"
+  },
+  {
+    "icon": "construction",
+    "title": "Mining Disaster",
+    "description": "Mining-related disasters include collapses, toxic spills, and explosions in or near mining sites.",
+    "preparation": "- Know site safety protocols\n- Wear proper protective gear\n- Regular inspection of mining zones\n- Establish emergency exits",
+    "during": "- Evacuate promptly\n- Avoid toxic areas\n- Use emergency breathing equipment\n- Follow rescue team instructions"
+  }
+]
