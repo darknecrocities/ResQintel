@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'map.dart';  // <-- Import your full MapPage and SearchPage here
 
 class Homepage extends StatefulWidget {
   const Homepage({super.key});
@@ -35,7 +36,7 @@ class _HomepageState extends State<Homepage> {
   void _onItemTapped(int index) {
     switch (index) {
       case 0:
-        // Stay on Home
+      // Stay on Home
         setState(() {
           _selectedIndex = 0;
         });
@@ -43,7 +44,7 @@ class _HomepageState extends State<Homepage> {
       case 1:
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => const SearchPage()),
+          MaterialPageRoute(builder: (context) => const SearchPage()),  // from map.dart
         );
         break;
       case 2:
@@ -55,7 +56,7 @@ class _HomepageState extends State<Homepage> {
       case 3:
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => const MapPage()),
+          MaterialPageRoute(builder: (context) => const MapPage()),  // from map.dart
         );
         break;
       case 4:
@@ -211,7 +212,7 @@ class _HomepageState extends State<Homepage> {
   }
 }
 
-// Below: placeholder pages in same file
+// Placeholder pages (only for pages not implemented yet)
 
 class LearnPage extends StatelessWidget {
   const LearnPage({super.key});
@@ -225,26 +226,14 @@ class LearnPage extends StatelessWidget {
   }
 }
 
-class MapPage extends StatelessWidget {
-  const MapPage({super.key});
+class SearchPage extends StatelessWidget {
+  const SearchPage({super.key});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Map')),
-      body: const Center(child: Text('This is the Map Page')),
-    );
-  }
-}
-
-class SettingsPage extends StatelessWidget {
-  const SettingsPage({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('Settings')),
-      body: const Center(child: Text('This is the Settings Page')),
+      appBar: AppBar(title: const Text('Learn')),
+      body: const Center(child: Text('This is the Learn Page')),
     );
   }
 }
@@ -261,14 +250,14 @@ class ProfilePage extends StatelessWidget {
   }
 }
 
-class SearchPage extends StatelessWidget {
-  const SearchPage({super.key});
+class SettingsPage extends StatelessWidget {
+  const SettingsPage({super.key});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Search')),
-      body: const Center(child: Text('This is the Search Page')),
+      appBar: AppBar(title: const Text('Settings')),
+      body: const Center(child: Text('This is the Settings Page')),
     );
   }
 }

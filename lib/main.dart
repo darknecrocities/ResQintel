@@ -1,6 +1,5 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
-
 import 'login.dart'; // Make sure this file exists and exports SignupScreen
 
 Future<void> main() async {
