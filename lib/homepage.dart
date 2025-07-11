@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 
 import 'learn.dart';
 import 'map.dart';
+import 'models/gemini_model.dart';
 import 'privacy.dart';
 import 'settings.dart';
 import 't&c.dart';
@@ -168,8 +169,15 @@ class _HomepageState extends State<Homepage> with TickerProviderStateMixin {
         style: const TextStyle(color: Colors.white, fontSize: 16),
       ),
       onTap: () {
-        Navigator.pop(context);
-        Navigator.push(context, MaterialPageRoute(builder: (_) => page));
+        Navigator.pop(context); // Close the drawer first
+        if (title == "Assistance") {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => const GeminiAssistantPage()),
+          );
+        } else {
+          Navigator.push(context, MaterialPageRoute(builder: (_) => page));
+        }
       },
     );
   }
@@ -247,31 +255,44 @@ class _HomepageState extends State<Homepage> with TickerProviderStateMixin {
   }
 
   Widget _featureCard(IconData icon, String label, Color color) {
-    return Container(
-      height: 120,
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: [
-          BoxShadow(
-            color: color.withOpacity(0.3),
-            blurRadius: 10,
-            offset: const Offset(0, 5),
-          ),
-        ],
-        border: Border.all(color: color.withOpacity(0.6), width: 1),
-      ),
-      child: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(icon, color: color, size: 36),
-            const SizedBox(height: 10),
-            Text(
-              label,
-              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+    return GestureDetector(
+      onTap: () {
+        if (label == "Assistance") {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => const GeminiAssistantPage()),
+          );
+        }
+      },
+      child: Container(
+        height: 120,
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(20),
+          boxShadow: [
+            BoxShadow(
+              color: color.withOpacity(0.3),
+              blurRadius: 10,
+              offset: const Offset(0, 5),
             ),
           ],
+          border: Border.all(color: color.withOpacity(0.6), width: 1),
+        ),
+        child: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(icon, color: color, size: 36),
+              const SizedBox(height: 10),
+              Text(
+                label,
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
