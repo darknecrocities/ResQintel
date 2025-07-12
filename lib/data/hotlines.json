@@ -1,0 +1,86 @@
+[
+  {
+    "name": "Police",
+    "government": "Philippine National Police (PNP)",
+    "description": "Responsible for maintaining peace and order, enforcing laws, and protecting citizens.",
+    "purpose": "Law enforcement and public safety",
+    "hotline": "911 or local police number"
+  },
+  {
+    "name": "Fire Department",
+    "government": "Bureau of Fire Protection (BFP)",
+    "description": "Handles fire prevention, suppression, and rescue operations.",
+    "purpose": "Fire emergency response and prevention",
+    "hotline": "911 or local fire department number"
+  },
+  {
+    "name": "Hospital",
+    "government": "Department of Health (DOH)",
+    "description": "Provides medical emergency services and healthcare support.",
+    "purpose": "Medical emergency response",
+    "hotline": "Local emergency hospital number"
+  },
+  {
+    "name": "Disaster Hotline",
+    "government": "National Disaster Risk Reduction and Management Council (NDRRMC)",
+    "description": "Coordinates disaster preparedness, response, and recovery.",
+    "purpose": "Disaster emergency response",
+    "hotline": "911 or NDRRMC Hotline: 911-9111"
+  },
+  {
+    "name": "Philippine Red Cross",
+    "government": "Philippine Red Cross",
+    "description": "Provides emergency medical services, blood donations, and disaster response.",
+    "purpose": "Medical aid and disaster assistance",
+    "hotline": "143 or (02) 8790-2300"
+  },
+  {
+    "name": "Coast Guard",
+    "government": "Philippine Coast Guard",
+    "description": "Responsible for maritime safety, security, and search and rescue operations.",
+    "purpose": "Maritime emergencies and rescue",
+    "hotline": "527-8481 to 90 or 136"
+  },
+  {
+    "name": "Philippine Air Force Rescue",
+    "government": "Philippine Air Force",
+    "description": "Provides air search and rescue operations during disasters and emergencies.",
+    "purpose": "Air rescue operations",
+    "hotline": "(02) 912-4947"
+  },
+  {
+    "name": "Traffic Management",
+    "government": "Metro Manila Development Authority (MMDA)",
+    "description": "Handles traffic enforcement and emergency response within Metro Manila.",
+    "purpose": "Traffic accidents and enforcement",
+    "hotline": "136 or (02) 8822-7921"
+  },
+  {
+    "name": "Emergency Medical Services",
+    "government": "Philippine General Hospital (PGH)",
+    "description": "Provides emergency medical treatment and ambulance services.",
+    "purpose": "Medical emergencies",
+    "hotline": "(02) 8554-8400"
+  },
+  {
+    "name": "National Poison Control and Management Center",
+    "government": "Department of Health",
+    "description": "Provides assistance for poison emergencies and toxic exposures.",
+    "purpose": "Poison emergency response",
+    "hotline": "1-800-10-222-9111 or (02) 892-5761"
+  },
+  {
+    "name": "Emergency Child Protection",
+    "government": "Department of Social Welfare and Development (DSWD)",
+    "description": "Offers assistance for child protection and welfare emergencies.",
+    "purpose": "Child protection and welfare",
+    "hotline": "163 or (02) 8931-8101"
+  },
+  {
+    "name": "Women's Crisis Center",
+    "government": "Philippine Commission on Women",
+    "description": "Provides support and emergency services for women victims of abuse.",
+    "purpose": "Women protection and crisis support",
+    "hotline": "1343"
+  }
+]

@@ -26,6 +26,13 @@ class _GeminiAssistantPageState extends State<GeminiAssistantPage> {
     );
   }
 
+  @override
+  void dispose() {
+    _controller.dispose();
+    _scrollController.dispose();
+    super.dispose();
+  }
+
   void _addSystemMessage(String text) {
     setState(() {
       _messages.add(_Message(text: text, isUser: false));
@@ -33,6 +40,8 @@ class _GeminiAssistantPageState extends State<GeminiAssistantPage> {
   }
 
   Future<void> _sendMessage(String text) async {
+    if (_isLoading) return; // prevent multiple requests
+
     setState(() {
       _messages.add(_Message(text: text, isUser: true));
       _isLoading = true;
@@ -72,19 +81,17 @@ class _GeminiAssistantPageState extends State<GeminiAssistantPage> {
         }),
       );
 
-      debugPrint("Status Code: ${response.statusCode}");
-      debugPrint("Response Body: ${response.body}");
-
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
-        final candidates = data["candidates"];
 
+        final candidates = data["candidates"];
         if (candidates != null &&
+            candidates is List &&
             candidates.isNotEmpty &&
             candidates[0]["content"] != null &&
             candidates[0]["content"]["parts"] != null) {
           final content = candidates[0]["content"]["parts"];
-          final aiResponse = content.map((e) => e["text"]).join("\n");
+          final aiResponse = content.map((e) => e["text"] ?? "").join("\n");
 
           setState(() {
             _messages.add(_Message(text: aiResponse.trim(), isUser: false));
@@ -100,7 +107,8 @@ class _GeminiAssistantPageState extends State<GeminiAssistantPage> {
         setState(() {
           _messages.add(
             _Message(
-              text: "⚠️ Error ${response.statusCode}: ${response.reasonPhrase}",
+              text:
+                  "⚠️ Error ${response.statusCode}: ${response.reasonPhrase ?? ''}",
               isUser: false,
             ),
           );
@@ -149,7 +157,7 @@ class _GeminiAssistantPageState extends State<GeminiAssistantPage> {
               fontWeight: FontWeight.bold,
               shadows: [
                 Shadow(
-                  offset: Offset(1, 1),
+                  offset: const Offset(1, 1),
                   blurRadius: 2,
                   color: Colors.black45,
                 ),
@@ -288,17 +296,23 @@ class _GeminiAssistantPageState extends State<GeminiAssistantPage> {
                           color: isDark ? Colors.grey[400] : Colors.grey[600],
                         ),
                       ),
+                      enabled: !_isLoading,
                     ),
                   ),
                   IconButton(
-                    icon: const Icon(Icons.send, color: Colors.red),
-                    onPressed: () {
-                      final text = _controller.text.trim();
-                      if (text.isNotEmpty) {
-                        _controller.clear();
-                        _sendMessage(text);
-                      }
-                    },
+                    icon: Icon(
+                      Icons.send,
+                      color: _isLoading ? Colors.grey : Colors.red,
+                    ),
+                    onPressed: _isLoading
+                        ? null
+                        : () {
+                            final text = _controller.text.trim();
+                            if (text.isNotEmpty) {
+                              _controller.clear();
+                              _sendMessage(text);
+                            }
+                          },
                   ),
                 ],
               ),

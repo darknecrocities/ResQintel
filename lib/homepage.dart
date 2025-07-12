@@ -2,12 +2,17 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
+import 'announcement.dart';
+import 'emergency.dart';
 import 'learn.dart';
 import 'map.dart';
 import 'models/gemini_model.dart';
 import 'privacy.dart';
+import 'profile.dart';
+import 'search.dart';
 import 'settings.dart';
 import 't&c.dart';
+import 'weather.dart';
 
 class Homepage extends StatefulWidget {
   const Homepage({super.key});
@@ -233,14 +238,29 @@ class _HomepageState extends State<Homepage> with TickerProviderStateMixin {
           ),
         ),
         const SizedBox(height: 30),
-        _featureCard(Icons.warning, "Center Alert Area", Colors.amber),
-        const SizedBox(height: 20),
+
+        // First row: Center Alert Area + Weather
         Row(
           children: [
             Expanded(
-              child: _featureCard(Icons.shield, "Safety Box", Colors.green),
+              child: _featureCard(
+                Icons.warning,
+                "Center Alert Area",
+                Colors.amber,
+              ),
             ),
             const SizedBox(width: 20),
+            Expanded(
+              child: _featureCard(Icons.cloud, "Weather", Colors.lightBlue),
+            ),
+          ],
+        ),
+
+        const SizedBox(height: 20),
+
+        // Second row: Assistance + Emergency Contacts
+        Row(
+          children: [
             Expanded(
               child: _featureCard(
                 Icons.support_agent,
@@ -248,7 +268,24 @@ class _HomepageState extends State<Homepage> with TickerProviderStateMixin {
                 Colors.blue,
               ),
             ),
+            const SizedBox(width: 20),
+            Expanded(
+              child: _featureCard(
+                Icons.phone_in_talk,
+                "Emergency Contacts",
+                Colors.redAccent,
+              ),
+            ),
           ],
+        ),
+
+        const SizedBox(height: 20),
+
+        // Third row: Disaster Alerts (full width)
+        _featureCard(
+          Icons.notifications_active,
+          "Disaster Alerts",
+          Colors.orange,
         ),
       ],
     );
@@ -257,15 +294,37 @@ class _HomepageState extends State<Homepage> with TickerProviderStateMixin {
   Widget _featureCard(IconData icon, String label, Color color) {
     return GestureDetector(
       onTap: () {
-        if (label == "Assistance") {
+        if (label == "Weather") {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => const WeatherPage()),
+          );
+        } else if (label == "Assistance") {
           Navigator.push(
             context,
             MaterialPageRoute(builder: (_) => const GeminiAssistantPage()),
+          );
+        } else if (label == "Emergency Contacts") {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (_) => const EmergencyContactsPage(),
+            ), // linked to emergency.dart page
+          );
+        } else if (label == "Disaster Alerts") {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (_) => const DisasterAlertsPage(),
+            ), // linked to announcement.dart page
           );
         }
       },
       child: Container(
         height: 120,
+        margin: label == "Disaster Alerts"
+            ? const EdgeInsets.symmetric(vertical: 10)
+            : null,
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(20),
@@ -295,32 +354,6 @@ class _HomepageState extends State<Homepage> with TickerProviderStateMixin {
           ),
         ),
       ),
-    );
-  }
-}
-
-// Placeholder Pages
-
-class SearchPage extends StatelessWidget {
-  const SearchPage({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('Search')),
-      body: const Center(child: Text('This is the Search Page')),
-    );
-  }
-}
-
-class ProfilePage extends StatelessWidget {
-  const ProfilePage({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('Profile')),
-      body: const Center(child: Text('This is the Profile Page')),
     );
   }
 }

@@ -1,0 +1,8 @@
+{
+  "Your Location": "This is your detected location based on GPS and reverse geocoding.",
+  "Current Time": "The current local time based on the latest weather data timestamp.",
+  "Temperature": "The current temperature in Celsius degrees. High temperatures may indicate heat warnings.",
+  "Wind Speed": "Current wind speed in kilometers per hour. Strong winds can be dangerous.",
+  "Condition": "Current weather condition such as clear, rainy, cloudy, or thunderstorms.",
+  "Danger Level": "A calculated danger level based on temperature and wind speed to help you stay safe."
+}
