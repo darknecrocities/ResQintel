@@ -1,0 +1,149 @@
+[
+  {
+    "title": "Typhoon Preparedness",
+    "description": "🌪️ Typhoons are powerful tropical cyclones bringing fierce winds and torrential rain. These storms can flood roads, topple trees, and knock out power. Coastal communities are most vulnerable, especially during storm surges.",
+    "checklist": [
+      "Before: Reinforce rooftops and windows, stock up on canned goods, water, medicine, and batteries",
+      "During: Stay indoors, keep updated with PAGASA reports, and avoid using mobile devices unnecessarily",
+      "After: Inspect your home for damage, avoid downed wires, and beware of post-storm flooding"
+    ],
+    "extraInfo": [
+      "Intensity Scale: Public Storm Warning Signal Nos. 1 to 5 (PAGASA)",
+      "Common Impact Areas: Eastern Visayas, Bicol Region, Quezon, Metro Manila",
+      "Surge Risk: Coastal villages and low-lying towns"
+    ],
+    "quickTips": [
+      "Trim nearby trees regularly",
+      "Place electronics above flood level"
+    ],
+    "hotlines": ["PAGASA: 8926-4258", "NDRRMC: 8911-1406"],
+    "color": "blueAccent",
+    "icon": "wind_power"
+  },
+  {
+    "title": "Earthquake Preparedness",
+    "description": "🌍 Earthquakes strike without warning and can shake buildings to their core. The Philippines sits on the Pacific Ring of Fire — a hotspot for seismic activity. Preparedness can save lives.",
+    "checklist": [
+      "Before: Bolt shelves and water heaters, know safe zones like under sturdy tables",
+      "During: Drop, Cover, and Hold On — stay indoors until shaking stops",
+      "After: Prepare for aftershocks, check for structural damage, avoid using elevators"
+    ],
+    "extraInfo": [
+      "Magnitude Scale: Moment Magnitude Scale (Mw), formerly Richter",
+      "Active Faults: Marikina Valley Fault System, Central Philippine Fault",
+      "Most Affected: Metro Manila, Davao, Luzon Highlands"
+    ],
+    "quickTips": [
+      "Practice drills every 3 months",
+      "Avoid glass or heavy hanging items"
+    ],
+    "hotlines": ["PHIVOLCS: 8929-9254", "NDRRMC: 8911-1406"],
+    "color": "deepOrange",
+    "icon": "terrain"
+  },
+  {
+    "title": "Fire Preparedness",
+    "description": "🔥 Fires can start in an instant — from electrical overloads, gas leaks, or kitchen mishaps. In densely populated areas, fire can spread fast. Preparation is key!",
+    "checklist": [
+      "Before: Install smoke detectors, create a family escape plan, and keep extinguishers ready",
+      "During: Evacuate calmly, stay low under smoke, and use fire blankets if trapped",
+      "After: Call authorities before re-entry, check for hidden embers, and get medical help for burns"
+    ],
+    "extraInfo": [
+      "Fire Hotspots: Urban communities with informal settlements",
+      "Peak Season: March (Fire Prevention Month in PH)",
+      "Emergency Number: 911 or your local Bureau of Fire Protection (BFP)"
+    ],
+    "quickTips": [
+      "Never leave cooking unattended",
+      "Test smoke alarms monthly"
+    ],
+    "hotlines": ["BFP: 426-0219", "911 (Nationwide)"],
+    "color": "red",
+    "icon": "local_fire_department"
+  },
+  {
+    "title": "Flood Preparedness",
+    "description": "🌊 Floods can turn streets into rivers within minutes. Triggered by heavy rains or dam overflows, floods pose serious risks to life and property — especially in cities with poor drainage.",
+    "checklist": [
+      "Before: Elevate valuables, unplug electronics, prepare ‘go bags’ with clothes, IDs, and food",
+      "During: Evacuate to higher ground immediately, avoid walking or driving through floodwaters",
+      "After: Disinfect your home, avoid stagnant water, and report damaged infrastructure"
+    ],
+    "extraInfo": [
+      "Flood-Prone Areas: Metro Manila, Pampanga, Marikina, Dagupan, Cagayan Valley",
+      "Health Hazards: Leptospirosis, dengue from mosquito breeding",
+      "Flood Alert Systems: Yellow, Orange, Red by PAGASA"
+    ],
+    "quickTips": [
+      "Move electrical appliances above expected flood height",
+      "Wear boots to avoid waterborne diseases"
+    ],
+    "hotlines": ["MMDA: 136", "DPWH Flood Control: 5304-3142"],
+    "color": "lightBlue",
+    "icon": "water_damage"
+  },
+  {
+    "title": "Landslide Preparedness",
+    "description": "⛰️ Landslides are deadly movements of rock, earth, or debris down a slope. They’re triggered by earthquakes or excessive rain, especially in mountainous or deforested regions.",
+    "checklist": [
+      "Before: Avoid building homes on steep slopes, plant trees to stabilize soil",
+      "During: Evacuate immediately if you hear rumbling or see cracks on walls or the ground",
+      "After: Avoid affected zones until cleared, and assist with community recovery efforts"
+    ],
+    "extraInfo": [
+      "Hazard Zones: Cordillera, Northern Mindanao, Southern Tagalog",
+      "Warning Signs: Cracks on ground, leaning trees, sudden changes in water flow",
+      "Landslide Triggers: Typhoons, deforestation, mining, or quakes"
+    ],
+    "quickTips": [
+      "Listen for unusual ground sounds",
+      "Report soil cracks to local officials"
+    ],
+    "hotlines": ["DENR-MGB: 8929-8756", "LGU Disaster Office"],
+    "color": "brown",
+    "icon": "landslide"
+  },
+  {
+    "title": "Volcanic Eruption Preparedness",
+    "description": "🌋 Volcanic eruptions release ash, lava, and deadly gases. The Philippines has over 20 active volcanoes, including Mayon and Taal. Always follow PHIVOLCS alerts.",
+    "checklist": [
+      "Before: Prepare N95 masks, know your evacuation route, store clean water",
+      "During: Stay indoors, use wet cloth to block ash, avoid low-lying areas",
+      "After: Remove ash from rooftops, boil water, and monitor respiratory health"
+    ],
+    "extraInfo": [
+      "Active Volcanoes: Mayon, Taal, Pinatubo, Kanlaon",
+      "Alert Levels: PHIVOLCS issues 0–5",
+      "Risk Areas: 6–14 km danger zones around volcanoes"
+    ],
+    "quickTips": [
+      "Never enter the permanent danger zone (PDZ)",
+      "Use goggles and masks outdoors"
+    ],
+    "hotlines": ["PHIVOLCS: 8929-9254", "Red Cross: 143"],
+    "color": "deepPurple",
+    "icon": "volcano"
+  },
+  {
+    "title": "Tsunami Preparedness",
+    "description": "🌊 Tsunamis are massive waves caused by underwater earthquakes or volcanic activity. They can strike coastal areas in minutes after the initial quake.",
+    "checklist": [
+      "Before: Know the natural signs (strong shaking, water pulling back), plan vertical evacuation routes",
+      "During: Head inland and to high ground immediately — do not wait for alarms",
+      "After: Stay tuned to local alerts, avoid coastlines until cleared"
+    ],
+    "extraInfo": [
+      "Tsunami-Prone Zones: Eastern Samar, Surigao, Davao Oriental",
+      "Warning Signs: Strong coastal quake, abnormal sea behavior",
+      "Expected Arrival Time: Within 10–30 minutes"
+    ],
+    "quickTips": [
+      "Practice vertical evacuation drills",
+      "Never go sightseeing after the first wave"
+    ],
+    "hotlines": ["PHIVOLCS Tsunami Desk: 8926-4258", "Coast Guard: 8527-8481"],
+    "color": "cyan",
+    "icon": "tsunami"
+  }
+]

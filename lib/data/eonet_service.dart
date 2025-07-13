@@ -24,35 +24,44 @@ class EonetService {
 
       final sources =
           event['sources']?[0]?['url'] ?? 'https://eonet.gsfc.nasa.gov/';
+
       final geometries = event['geometry'] as List;
 
-      final latestGeometry = geometries.isNotEmpty ? geometries.last : null;
+      // Find all geometries inside the Philippines bounding box
+      final phGeometries = <Map<String, dynamic>>[];
 
-      if (latestGeometry == null) continue;
+      for (var geometry in geometries) {
+        try {
+          var rawLat = geometry['coordinates'][1];
+          var rawLon = geometry['coordinates'][0];
+          double lat = rawLat is int ? rawLat.toDouble() : rawLat;
+          double lon = rawLon is int ? rawLon.toDouble() : rawLon;
 
-      // Safely convert coordinate values to double
-      double lat;
-      double lon;
-
-      try {
-        var rawLat = latestGeometry['coordinates'][1];
-        var rawLon = latestGeometry['coordinates'][0];
-        lat = rawLat is int ? rawLat.toDouble() : rawLat;
-        lon = rawLon is int ? rawLon.toDouble() : rawLon;
-      } catch (e) {
-        continue; // skip if coordinates are invalid
+          if (lat >= 4 && lat <= 21 && lon >= 115 && lon <= 127) {
+            phGeometries.add(geometry);
+          }
+        } catch (e) {
+          // Ignore invalid coordinates
+          continue;
+        }
       }
 
-      // Check if coordinates are inside Philippines bounding box
-      final bool inPhilippines =
-          lat >= 4 && lat <= 21 && lon >= 115 && lon <= 127;
+      // Skip events with no geometry in PH
+      if (phGeometries.isEmpty) continue;
 
-      if (!inPhilippines) continue;
+      // Use the latest geometry inside PH (by date)
+      phGeometries.sort(
+        (a, b) =>
+            DateTime.parse(b['date']).compareTo(DateTime.parse(a['date'])),
+      );
+      final latestPHGeometry = phGeometries.first;
 
-      final location = "$lat, $lon";
-
-      final dateString = latestGeometry['date'].toString();
+      final dateString = latestPHGeometry['date'].toString();
       final date = dateString.split('T')[0];
+
+      final lat = latestPHGeometry['coordinates'][1];
+      final lon = latestPHGeometry['coordinates'][0];
+      final location = "$lat, $lon";
 
       phEvents.add({
         'title': event['title'],

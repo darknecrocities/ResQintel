@@ -86,6 +86,7 @@ flutter:
     - lib/assets/disaster_data.json
     - lib/assets/weather.json
     - lib/data/hotlines.json
+    - lib/data/prepare.json
     - icon.png
 
 flutter_launcher_icons:

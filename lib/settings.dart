@@ -1,5 +1,9 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+
+import 'login.dart';
+import 'profile.dart'; // Make sure this file exists and exports ProfilePage
 
 class SettingsPage extends StatefulWidget {
   const SettingsPage({super.key});
@@ -10,6 +14,31 @@ class SettingsPage extends StatefulWidget {
 
 class _SettingsPageState extends State<SettingsPage> {
   final user = FirebaseAuth.instance.currentUser;
+  String fullName = '';
+  String email = '';
+
+  @override
+  void initState() {
+    super.initState();
+    _loadUserData();
+  }
+
+  Future<void> _loadUserData() async {
+    if (user != null) {
+      final doc = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(user!.uid)
+          .get();
+
+      final data = doc.data();
+      if (data != null) {
+        setState(() {
+          fullName = "${data['firstname']} ${data['lastname']}";
+          email = data['email'] ?? user!.email ?? '';
+        });
+      }
+    }
+  }
 
   void _logout() async {
     final confirm = await showDialog<bool>(
@@ -34,9 +63,10 @@ class _SettingsPageState extends State<SettingsPage> {
     if (confirm ?? false) {
       await FirebaseAuth.instance.signOut();
       if (context.mounted) {
-        Navigator.of(
+        Navigator.pushReplacement(
           context,
-        ).pushReplacementNamed('/login'); // Ensure your login route is set
+          MaterialPageRoute(builder: (_) => const LoginScreen()),
+        );
       }
     }
   }
@@ -72,8 +102,10 @@ class _SettingsPageState extends State<SettingsPage> {
               ),
               child: ListTile(
                 leading: const Icon(Icons.person, color: Colors.red),
-                title: Text(user?.displayName ?? "No Name"),
-                subtitle: Text(user?.email ?? "No Email"),
+                title: Text(
+                  fullName.isNotEmpty ? fullName : "Fetching name...",
+                ),
+                subtitle: Text(email),
               ),
             ),
             const SizedBox(height: 30),
@@ -94,13 +126,14 @@ class _SettingsPageState extends State<SettingsPage> {
               },
             ),
 
-            // Update Profile
+            // Update Profile - Navigate to ProfilePage
             ListTile(
               leading: const Icon(Icons.edit, color: Colors.red),
               title: const Text("Update Profile"),
               onTap: () {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text("Update Profile - Coming Soon")),
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const ProfilePage()),
                 );
               },
             ),

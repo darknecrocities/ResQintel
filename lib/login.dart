@@ -13,7 +13,7 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
-  final _auth = FirebaseAuth.instance;
+  final FirebaseAuth _auth = FirebaseAuth.instance;
 
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
@@ -21,6 +21,7 @@ class _LoginScreenState extends State<LoginScreen> {
   bool _isLoading = false;
   String? _errorMessage;
   bool _rememberMe = false;
+  bool _obscurePassword = true; // for show/hide password toggle
 
   @override
   void initState() {
@@ -63,18 +64,27 @@ class _LoginScreenState extends State<LoginScreen> {
     });
 
     try {
-      await _auth.signInWithEmailAndPassword(
-        email: _emailController.text.trim(),
-        password: _passwordController.text.trim(),
-      );
+      final UserCredential userCredential = await _auth
+          .signInWithEmailAndPassword(
+            email: _emailController.text.trim(),
+            password: _passwordController.text.trim(),
+          );
 
-      await _saveCredentials();
+      final user = userCredential.user;
 
-      if (mounted) {
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (_) => const Homepage()),
-        );
+      if (user != null) {
+        await _saveCredentials();
+
+        if (context.mounted) {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (_) => const Homepage()),
+          );
+        }
+      } else {
+        setState(() {
+          _errorMessage = "User not found or email not verified.";
+        });
       }
     } on FirebaseAuthException catch (e) {
       setState(() {
@@ -82,7 +92,7 @@ class _LoginScreenState extends State<LoginScreen> {
       });
     } catch (_) {
       setState(() {
-        _errorMessage = "An unknown error occurred.";
+        _errorMessage = "An unexpected error occurred.";
       });
     } finally {
       if (mounted) {
@@ -190,12 +200,24 @@ class _LoginScreenState extends State<LoginScreen> {
                         const SizedBox(height: 10),
                         TextField(
                           controller: _passwordController,
-                          obscureText: true,
-                          decoration: const InputDecoration(
+                          obscureText: _obscurePassword,
+                          decoration: InputDecoration(
                             labelText: "Password",
                             filled: true,
                             fillColor: Colors.white,
-                            border: OutlineInputBorder(),
+                            border: const OutlineInputBorder(),
+                            suffixIcon: IconButton(
+                              icon: Icon(
+                                _obscurePassword
+                                    ? Icons.visibility_off
+                                    : Icons.visibility,
+                              ),
+                              onPressed: () {
+                                setState(() {
+                                  _obscurePassword = !_obscurePassword;
+                                });
+                              },
+                            ),
                           ),
                         ),
                         const SizedBox(height: 10),

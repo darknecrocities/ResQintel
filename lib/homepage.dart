@@ -7,9 +7,9 @@ import 'emergency.dart';
 import 'learn.dart';
 import 'map.dart';
 import 'models/gemini_model.dart';
+import 'prepared.dart';
 import 'privacy.dart';
 import 'profile.dart';
-import 'search.dart';
 import 'settings.dart';
 import 't&c.dart';
 import 'weather.dart';
@@ -64,7 +64,7 @@ class _HomepageState extends State<Homepage> with TickerProviderStateMixin {
       case 1:
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (_) => const SearchPage()),
+          MaterialPageRoute(builder: (_) => const PreparednessPage()),
         );
         break;
       case 2:
@@ -157,7 +157,7 @@ class _HomepageState extends State<Homepage> with TickerProviderStateMixin {
         onTap: _onItemTapped,
         items: const [
           BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
-          BottomNavigationBarItem(icon: Icon(Icons.search), label: 'Search'),
+          BottomNavigationBarItem(icon: Icon(Icons.build), label: 'Prepare'),
           BottomNavigationBarItem(icon: Icon(Icons.school), label: 'Learn'),
           BottomNavigationBarItem(icon: Icon(Icons.map), label: 'Map'),
           BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profile'),
