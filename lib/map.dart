@@ -1,10 +1,11 @@
 import 'dart:async';
-import 'dart:convert';
 
+import 'package:excel/excel.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:http/http.dart' as http;
 import 'package:permission_handler/permission_handler.dart';
 
 class MapPage extends StatefulWidget {
@@ -17,389 +18,320 @@ class MapPage extends StatefulWidget {
 class _MapPageState extends State<MapPage> {
   late GoogleMapController _mapController;
   LatLng? _currentLocation;
-  final Set<Marker> _markers = {};
-
-  final String _googleApiKey = 'AIzaSyB2uJz4ZPuWmHZ0O9VSf95K2dqyn2Y-un8';
-
-  final int radiusInMeters = 100000; // 100 km
-
-  Map<String, dynamic>? _selectedSite;
-  double? _distanceToSelectedSite;
-  StreamSubscription<Position>? _positionStream;
-
+  Set<Marker> _markers = {};
   bool _loadingSchools = false;
-  String _statusMessage = "Loading current location...";
+  String _statusMessage = "Getting location...";
+  Map<String, dynamic>? _selectedSchool;
+  double? _distanceToSchool;
+  StreamSubscription<Position>? _positionStream;
 
   @override
   void initState() {
     super.initState();
-    _initLocationAndFetch();
+    _initLocationAndLoad();
   }
 
   @override
   void dispose() {
     _positionStream?.cancel();
+    _mapController.dispose();
     super.dispose();
   }
 
-  Future<void> _initLocationAndFetch() async {
-    var status = await Permission.location.status;
+  Future<void> _initLocationAndLoad() async {
+    final status = await Permission.location.request();
     if (!status.isGranted) {
-      status = await Permission.location.request();
+      setState(() => _statusMessage = "Location permission denied.");
+      return;
     }
 
-    if (status.isGranted) {
-      try {
-        final pos = await Geolocator.getCurrentPosition(
-          desiredAccuracy: LocationAccuracy.high,
-        );
-        _currentLocation = LatLng(pos.latitude, pos.longitude);
-        setState(() {
-          _statusMessage = "Fetching nearby schools...";
-          _loadingSchools = true;
-        });
-        await _fetchNearbySchools();
-        // We do NOT start tracking until user selects a site
-      } catch (e) {
-        setState(() {
-          _statusMessage = "Failed to get location: $e";
-          _loadingSchools = false;
-        });
-      }
-    } else {
+    try {
+      final pos = await Geolocator.getCurrentPosition();
+      _currentLocation = LatLng(pos.latitude, pos.longitude);
       setState(() {
-        _statusMessage =
-            "Location permission denied. Please enable it in settings.";
+        _statusMessage = "Loading evacuation sites...";
+        _loadingSchools = true;
       });
-      await openAppSettings();
+      await _loadExcelInIsolate();
+    } catch (e) {
+      setState(() => _statusMessage = "Failed to get location: $e");
     }
   }
 
-  Future<void> _fetchNearbySchools() async {
-    if (_currentLocation == null) return;
-
-    final url =
-        'https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=${_currentLocation!.latitude},${_currentLocation!.longitude}&radius=$radiusInMeters&type=school&key=$_googleApiKey';
-
+  Future<void> _loadExcelInIsolate() async {
     try {
-      final response = await http.get(Uri.parse(url));
-      if (response.statusCode == 200) {
-        final data = json.decode(response.body);
-        final List results = data['results'];
+      final bytes = await rootBundle.load('lib/data/publicschool.xlsx');
+      final result = await compute(_parseExcelRows, bytes.buffer.asUint8List());
 
-        _markers.clear();
+      final nearby = result.where((school) {
+        return _currentLocation != null &&
+            _isNearby(_currentLocation!, school['lat'], school['lng'], 30000);
+      }).toList();
 
-        for (var school in results) {
-          final name = school['name'];
-          final lat = school['geometry']['location']['lat'];
-          final lng = school['geometry']['location']['lng'];
+      final tempMarkers = <Marker>{};
 
-          _markers.add(
-            Marker(
-              markerId: MarkerId(name),
-              position: LatLng(lat, lng),
-              icon: BitmapDescriptor.defaultMarkerWithHue(
-                BitmapDescriptor.hueRed,
-              ),
-              infoWindow: InfoWindow(title: name, snippet: "Tap to select"),
-              onTap: () => _showEvacuationSiteSheet(school),
+      for (var s in nearby) {
+        final school = Map<String, dynamic>.from(
+          s,
+        ); // Create new scoped reference
+        final LatLng pos = LatLng(school['lat'], school['lng']);
+        tempMarkers.add(
+          Marker(
+            markerId: MarkerId(school['name']),
+            position: pos,
+            infoWindow: InfoWindow(
+              title: school['name'],
+              snippet: school['vicinity'],
             ),
-          );
-        }
-        setState(() {
-          _loadingSchools = false;
-          _statusMessage = "Select an evacuation site by tapping a marker.";
-        });
-      } else {
-        setState(() {
-          _loadingSchools = false;
-          _statusMessage = "Failed to fetch nearby schools.";
-        });
+            icon: BitmapDescriptor.defaultMarkerWithHue(
+              BitmapDescriptor.hueRed,
+            ),
+            onTap: () => _showSchoolSheet(school),
+          ),
+        );
       }
+
+      setState(() {
+        _markers = tempMarkers;
+        _loadingSchools = false;
+        _statusMessage = "Tap a marker to view evacuation site info.";
+      });
     } catch (e) {
       setState(() {
         _loadingSchools = false;
-        _statusMessage = "Error fetching schools: $e";
+        _statusMessage = "Failed to load sites: $e";
       });
     }
   }
 
-  void _showEvacuationSiteSheet(Map<String, dynamic> school) {
-    _selectedSite = school;
-    _distanceToSelectedSite = null;
+  static List<Map<String, dynamic>> _parseExcelRows(Uint8List bytes) {
+    final excel = Excel.decodeBytes(bytes);
+    final sheet = excel.tables.values.first;
+    final rows = sheet.rows;
+    final header = rows.first;
 
-    final LatLng schoolLoc = LatLng(
-      school['geometry']['location']['lat'],
-      school['geometry']['location']['lng'],
+    int idx(String col) =>
+        header.indexWhere((c) => c?.value.toString().trim() == col);
+
+    final idxName = idx('name');
+    final idxLat = idx('latitude');
+    final idxLng = idx('longitude');
+    final idxRegion = idx('addr:region');
+    final idxProv = idx('addr:province');
+    final idxCity = idx('addr:city');
+    final idxTown = idx('addr:town');
+
+    if ([idxName, idxLat, idxLng].contains(-1)) return [];
+
+    final List<Map<String, dynamic>> list = [];
+
+    for (var row in rows.skip(1)) {
+      if (row.length < idxLng + 1) continue;
+
+      final name = row[idxName]?.value.toString();
+      final lat = double.tryParse(row[idxLat]?.value.toString() ?? '');
+      final lng = double.tryParse(row[idxLng]?.value.toString() ?? '');
+      final region = row[idxRegion]?.value.toString() ?? '';
+      final prov = row[idxProv]?.value.toString() ?? '';
+      final city = row[idxCity]?.value.toString() ?? '';
+      final town = row[idxTown]?.value.toString() ?? '';
+
+      if (name == null || lat == null || lng == null) continue;
+
+      list.add({
+        'name': name,
+        'lat': lat,
+        'lng': lng,
+        'vicinity': "$region, $prov, ${city.isNotEmpty ? city : town}",
+      });
+    }
+
+    return list;
+  }
+
+  bool _isNearby(LatLng user, double lat, double lng, double radius) {
+    final d = Geolocator.distanceBetween(
+      user.latitude,
+      user.longitude,
+      lat,
+      lng,
     );
+    return d <= radius;
+  }
 
-    _mapController.animateCamera(CameraUpdate.newLatLngZoom(schoolLoc, 14));
+  void _showSchoolSheet(Map<String, dynamic> school) {
+    _selectedSchool = school;
+    _startDistanceTracking(school['lat'], school['lng']);
 
-    _startTrackingDistance();
+    final LatLng pos = LatLng(school['lat'], school['lng']);
+    _mapController.animateCamera(CameraUpdate.newLatLngZoom(pos, 14));
 
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      backgroundColor:
-          Colors.transparent, // Transparent for nice rounded corners
-      builder: (context) {
+      backgroundColor: Colors.transparent,
+      builder: (_) {
         return StatefulBuilder(
-          builder: (BuildContext context, StateSetter setModalState) {
-            // Update distance live inside modal
+          builder: (context, setSheetState) {
             _positionStream?.onData((position) {
-              final LatLng userLoc = LatLng(
-                position.latitude,
-                position.longitude,
+              final user = LatLng(position.latitude, position.longitude);
+              final dist = Geolocator.distanceBetween(
+                user.latitude,
+                user.longitude,
+                school['lat'],
+                school['lng'],
               );
-              final distance = Geolocator.distanceBetween(
-                userLoc.latitude,
-                userLoc.longitude,
-                schoolLoc.latitude,
-                schoolLoc.longitude,
-              );
-              setModalState(() {
-                _distanceToSelectedSite = distance;
-                _currentLocation = userLoc;
-              });
+              setSheetState(() => _distanceToSchool = dist);
             });
 
-            String distanceText = _distanceToSelectedSite == null
-                ? "Calculating distance..."
-                : _formatDistance(_distanceToSelectedSite!);
-
             return DraggableScrollableSheet(
-              initialChildSize: 0.38,
-              minChildSize: 0.25,
-              maxChildSize: 0.85,
               expand: false,
+              initialChildSize: 0.4,
+              maxChildSize: 0.9,
               builder: (_, controller) => Container(
-                margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                decoration: BoxDecoration(
-                  borderRadius: const BorderRadius.vertical(
-                    top: Radius.circular(30),
-                  ),
-                  gradient: LinearGradient(
-                    colors: [Colors.red.shade700, Colors.red.shade400],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  ),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.red.shade900.withOpacity(0.6),
-                      blurRadius: 25,
-                      offset: const Offset(0, -8),
-                      spreadRadius: 2,
-                    ),
-                  ],
+                padding: const EdgeInsets.all(24),
+                decoration: const BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
                 ),
-                child: ClipRRect(
-                  borderRadius: const BorderRadius.vertical(
-                    top: Radius.circular(30),
-                  ),
-                  child: Container(
-                    color: Colors.white,
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 24,
-                      vertical: 30,
+                child: ListView(
+                  controller: controller,
+                  children: [
+                    Center(
+                      child: Container(
+                        width: 60,
+                        height: 6,
+                        decoration: BoxDecoration(
+                          color: Colors.grey[300],
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                      ),
                     ),
-                    child: ListView(
-                      controller: controller,
+                    const SizedBox(height: 16),
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Expanded(
-                              child: Text(
-                                school['name'],
-                                style: TextStyle(
-                                  fontSize: 26,
-                                  fontWeight: FontWeight.w900,
-                                  color: Colors.red.shade800,
-                                  letterSpacing: 1.1,
-                                ),
-                              ),
-                            ),
-                            Material(
-                              color: Colors.red.shade700,
-                              shape: const CircleBorder(),
-                              child: IconButton(
-                                icon: const Icon(
-                                  Icons.close,
-                                  color: Colors.white,
-                                ),
-                                onPressed: () {
-                                  Navigator.pop(context);
-                                  _positionStream?.cancel();
-                                  setState(() {
-                                    _selectedSite = null;
-                                    _distanceToSelectedSite = null;
-                                    _statusMessage =
-                                        "Select an evacuation site by tapping a marker.";
-                                  });
-                                },
-                                tooltip: "Close",
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 16),
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            vertical: 12,
-                            horizontal: 16,
-                          ),
-                          decoration: BoxDecoration(
-                            color: Colors.red.shade50,
-                            borderRadius: BorderRadius.circular(14),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.red.shade200.withOpacity(0.8),
-                                blurRadius: 10,
-                                offset: const Offset(0, 3),
-                                spreadRadius: 1,
-                              ),
-                            ],
-                          ),
+                        const Icon(Icons.school, size: 32, color: Colors.red),
+                        const SizedBox(width: 12),
+                        Expanded(
                           child: Text(
-                            school['vicinity'] ??
-                                "Location information unavailable.",
-                            style: TextStyle(
-                              fontSize: 18,
-                              color: Colors.red.shade700,
-                              fontWeight: FontWeight.w600,
-                              height: 1.4,
-                            ),
-                          ),
-                        ),
-                        const SizedBox(height: 30),
-                        Text(
-                          "Distance from you:",
-                          style: TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.red.shade800,
-                            letterSpacing: 0.8,
-                          ),
-                        ),
-                        const SizedBox(height: 10),
-                        Container(
-                          padding: const EdgeInsets.symmetric(vertical: 16),
-                          decoration: BoxDecoration(
-                            gradient: LinearGradient(
-                              colors: [
-                                Colors.red.shade600,
-                                Colors.red.shade400,
-                              ],
-                              begin: Alignment.centerLeft,
-                              end: Alignment.centerRight,
-                            ),
-                            borderRadius: BorderRadius.circular(30),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.red.shade300.withOpacity(0.7),
-                                blurRadius: 15,
-                                offset: const Offset(0, 6),
-                                spreadRadius: 2,
-                              ),
-                            ],
-                          ),
-                          child: Center(
-                            child: Text(
-                              distanceText,
-                              style: const TextStyle(
-                                fontSize: 28,
-                                fontWeight: FontWeight.w900,
-                                color: Colors.white,
-                                letterSpacing: 1.2,
-                              ),
-                            ),
-                          ),
-                        ),
-                        const SizedBox(height: 40),
-                        ElevatedButton.icon(
-                          onPressed: () {
-                            Navigator.pop(context);
-                            _positionStream?.cancel();
-                            setState(() {
-                              _selectedSite = null;
-                              _distanceToSelectedSite = null;
-                              _statusMessage =
-                                  "Select an evacuation site by tapping a marker.";
-                            });
-                          },
-                          icon: const Icon(Icons.close),
-                          label: const Text("Close"),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.red.shade700,
-                            padding: const EdgeInsets.symmetric(vertical: 16),
-                            textStyle: const TextStyle(
-                              fontSize: 20,
+                            school['name'] ?? 'Unknown School',
+                            style: const TextStyle(
+                              fontSize: 22,
                               fontWeight: FontWeight.bold,
+                              color: Colors.black87,
                             ),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(16),
-                            ),
-                            shadowColor: Colors.red.shade900,
-                            elevation: 8,
                           ),
                         ),
-                        // Extra spacing so content doesn't get cut off in scroll
-                        const SizedBox(height: 30),
                       ],
                     ),
-                  ),
+                    const SizedBox(height: 16),
+                    Row(
+                      children: [
+                        const Icon(
+                          Icons.location_city,
+                          size: 20,
+                          color: Colors.red,
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            school['vicinity'] ?? "Address not available",
+                            style: const TextStyle(
+                              fontSize: 16,
+                              color: Colors.black54,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 24),
+                    Container(
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: [Colors.red.shade700, Colors.red.shade400],
+                        ),
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      child: Column(
+                        children: [
+                          const Text(
+                            "Distance from your location:",
+                            style: TextStyle(
+                              fontSize: 16,
+                              color: Colors.white70,
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            _distanceToSchool == null
+                                ? "Calculating..."
+                                : _formatDistance(_distanceToSchool!),
+                            style: const TextStyle(
+                              fontSize: 26,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 24),
+                    ElevatedButton.icon(
+                      onPressed: () {
+                        _positionStream?.cancel();
+                        _selectedSchool = null;
+                        Navigator.pop(context);
+                      },
+                      icon: const Icon(Icons.close),
+                      label: const Text("Close"),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.red.shade800,
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        textStyle: const TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w600,
+                        ),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ),
             );
           },
         );
       },
-    );
+    ).whenComplete(() {
+      _positionStream?.cancel();
+      _distanceToSchool = null;
+      _selectedSchool = null;
+      setState(() {
+        _statusMessage = "Tap a marker to view evacuation site info.";
+      });
+    });
   }
 
-  void _startTrackingDistance() {
+  void _startDistanceTracking(double lat, double lng) {
     _positionStream?.cancel();
-
-    if (_selectedSite == null) return;
-
-    final LatLng schoolLoc = LatLng(
-      _selectedSite!['geometry']['location']['lat'],
-      _selectedSite!['geometry']['location']['lng'],
-    );
-
-    _positionStream =
-        Geolocator.getPositionStream(
-          locationSettings: const LocationSettings(
-            accuracy: LocationAccuracy.best,
-            distanceFilter: 10,
-          ),
-        ).listen((position) {
-          final LatLng userLoc = LatLng(position.latitude, position.longitude);
-          final distance = Geolocator.distanceBetween(
-            userLoc.latitude,
-            userLoc.longitude,
-            schoolLoc.latitude,
-            schoolLoc.longitude,
-          );
-
-          setState(() {
-            _distanceToSelectedSite = distance;
-            _currentLocation = userLoc;
-          });
-        });
+    _positionStream = Geolocator.getPositionStream(
+      locationSettings: const LocationSettings(
+        accuracy: LocationAccuracy.high,
+        distanceFilter: 100,
+      ),
+    ).listen((_) {});
   }
 
-  String _formatDistance(double meters) {
-    if (meters >= 1000) {
-      return "${(meters / 1000).toStringAsFixed(2)} km";
-    } else {
-      return "${meters.toStringAsFixed(0)} m";
-    }
-  }
+  String _formatDistance(double m) => m >= 1000
+      ? "${(m / 1000).toStringAsFixed(2)} km"
+      : "${m.toStringAsFixed(0)} m";
 
   void _onMapCreated(GoogleMapController controller) {
     _mapController = controller;
-
     if (_currentLocation != null) {
       _mapController.animateCamera(
         CameraUpdate.newLatLngZoom(_currentLocation!, 12),
@@ -411,28 +343,27 @@ class _MapPageState extends State<MapPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Colors.red.shade700,
+        backgroundColor: Colors.red.shade800,
         centerTitle: true,
+        elevation: 3,
         title: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(Icons.location_on_rounded, color: Colors.white),
+            const Icon(Icons.warning_amber_rounded, color: Colors.white),
             const SizedBox(width: 8),
             Text(
               "Evacuation Map",
               style: const TextStyle(
-                fontWeight: FontWeight.w900,
-                fontSize: 18,
-                letterSpacing: 0.8,
-                fontFamily: 'Roboto',
+                fontWeight: FontWeight.bold,
+                fontSize: 20,
+                letterSpacing: 1.2,
                 color: Colors.white,
               ),
-              textAlign: TextAlign.center,
             ),
           ],
         ),
       ),
-      body: _loadingSchools && _currentLocation == null
+      body: _loadingSchools
           ? const Center(child: CircularProgressIndicator())
           : Stack(
               children: [
@@ -451,17 +382,15 @@ class _MapPageState extends State<MapPage> {
                   left: 0,
                   right: 0,
                   child: Container(
-                    color: Colors.red[50],
                     padding: const EdgeInsets.all(12),
+                    color: Colors.white,
                     child: Text(
                       _statusMessage,
-                      style: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.redAccent,
-                        fontFamily: 'Roboto',
-                      ),
                       textAlign: TextAlign.center,
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: Colors.red,
+                      ),
                     ),
                   ),
                 ),

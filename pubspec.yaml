@@ -48,6 +48,8 @@ dependencies:
   url_launcher: ^6.1.14
   image_picker: ^0.8.7+4
   firebase_storage: 12.4.9
+  excel: ^2.0.4
+  path_provider: ^2.1.1
 
 
   # The following adds the Cupertino Icons font to your application.
@@ -83,6 +85,7 @@ flutter:
     - Assets/bg.png
     - Assets/bgcolor.png
     - Assets/logo.png
+    - lib/data/publicschool.xlsx
     - lib/assets/disaster_data.json
     - lib/assets/weather.json
     - lib/data/hotlines.json
