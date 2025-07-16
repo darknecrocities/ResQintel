@@ -7,6 +7,7 @@
 
 ## 📌 Overview
 
+
 **ResQintel (Rescue Intel)** is a full-stack mobile application designed to empower Filipino citizens with real-time information, preparedness guides, and emergency alerts for a wide range of disasters, including fires, typhoons, and earthquakes. Leveraging the power of artificial intelligence, image recognition, and cloud technologies, ResQintel serves as an intelligent, inclusive, and proactive disaster management platform.
 
 ---
