@@ -1,8 +1,5 @@
 # ResQintel: AI-Powered All-in-One Disaster App
 
-### Group Name: Four Evermore
-
-
 ---
 
 ## 📌 Overview
